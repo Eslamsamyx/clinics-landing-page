@@ -1,0 +1,688 @@
+import { useState, useMemo } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Calendar,
+  Users,
+  CheckCircle,
+  Clock,
+  LogOut,
+  Plus,
+  Trash2,
+  Edit,
+  Stethoscope,
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  Phone,
+  FileText,
+} from "lucide-react";
+import { StatsCards } from "~/components/admin/StatsCards";
+import { BookingWizard } from "~/components/admin/BookingWizard";
+import { DashboardHeader } from "~/components/admin/DashboardHeader";
+import { WelcomeMessage } from "~/components/admin/WelcomeMessage";
+import { ServicesManagement } from "~/components/admin/ServicesManagement";
+import { ServiceModal } from "~/components/admin/ServiceModal";
+import { BookingsSection } from "~/components/admin/BookingsSection";
+import { api } from "~/utils/api";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { useNotification } from "~/components/NotificationProvider";
+import { BookingStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+
+// Helper function to get status badge styling
+const getStatusBadge = (status: BookingStatus) => {
+  const badges = {
+    PENDING: {
+      label: "قيد الانتظار",
+      bg: "bg-amber-100",
+      text: "text-amber-800",
+      border: "border-amber-200",
+      icon: Clock,
+    },
+    CONFIRMED: {
+      label: "مؤكد",
+      bg: "bg-emerald-100",
+      text: "text-emerald-800",
+      border: "border-emerald-200",
+      icon: CheckCircle,
+    },
+    CANCELLED: {
+      label: "ملغي",
+      bg: "bg-red-100",
+      text: "text-red-800",
+      border: "border-red-200",
+      icon: X,
+    },
+    COMPLETED: {
+      label: "مكتمل",
+      bg: "bg-blue-100",
+      text: "text-blue-800",
+      border: "border-blue-200",
+      icon: CheckCircle,
+    },
+  };
+  return badges[status];
+};
+
+// Helper function to get patient avatar color
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-gradient-to-br from-purple-500 to-pink-500",
+    "bg-gradient-to-br from-blue-500 to-cyan-500",
+    "bg-gradient-to-br from-green-500 to-emerald-500",
+    "bg-gradient-to-br from-orange-500 to-yellow-500",
+    "bg-gradient-to-br from-red-500 to-pink-500",
+    "bg-gradient-to-br from-indigo-500 to-purple-500",
+  ];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index];
+};
+
+export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const notification = useNotification();
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [showBookingWizard, setShowBookingWizard] = useState(false);
+  const [bookingStep, setBookingStep] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const [newService, setNewService] = useState({
+    name: "",
+    description: "",
+    duration: 30,
+    price: 0,
+  });
+  const [newPatient, setNewPatient] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+  const [newBooking, setNewBooking] = useState({
+    serviceId: "",
+    date: "",
+    time: "",
+    notes: "",
+  });
+
+  // Redirect if not authenticated
+  if (status === "unauthenticated") {
+    void router.push("/admin/login");
+    return null;
+  }
+
+  // Queries
+  const { data: stats } = api.admin.getStats.useQuery();
+  const { data: bookings, refetch: refetchBookings } =
+    api.admin.getAllBookings.useQuery();
+  const { data: services, refetch: refetchServices } =
+    api.admin.getAllServices.useQuery();
+  const { data: searchResults } = api.admin.searchPatients.useQuery(
+    { query: patientSearchQuery },
+    { enabled: patientSearchQuery.length > 0 }
+  );
+
+  // Mutations
+  const createService = api.admin.createService.useMutation({
+    onSuccess: () => {
+      notification.success("تم إضافة الخدمة بنجاح");
+      void refetchServices();
+      setShowServiceModal(false);
+      setNewService({ name: "", description: "", duration: 30, price: 0 });
+    },
+    onError: () => notification.error("فشل في إضافة الخدمة"),
+  });
+
+  const deleteService = api.admin.deleteService.useMutation({
+    onSuccess: () => {
+      notification.success("تم حذف الخدمة بنجاح");
+      void refetchServices();
+    },
+    onError: () => notification.error("فشل في حذف الخدمة"),
+  });
+
+  const updateBookingStatus = api.admin.updateBookingStatus.useMutation({
+    onSuccess: () => {
+      notification.success("تم تحديث حالة الحجز");
+      void refetchBookings();
+    },
+    onError: () => notification.error("فشل في تحديث الحالة"),
+  });
+
+  const createPatient = api.admin.createPatient.useMutation({
+    onSuccess: (patient) => {
+      notification.success("تم إضافة المريض بنجاح");
+      setSelectedPatient(patient.id);
+      setBookingStep(2);
+      setNewPatient({ firstName: "", lastName: "", email: "", phone: "" });
+    },
+    onError: () => notification.error("فشل في إضافة المريض"),
+  });
+
+  const createBookingForPatient = api.admin.createBookingForPatient.useMutation({
+    onSuccess: () => {
+      notification.success("تم إضافة الحجز بنجاح");
+      void refetchBookings();
+      setShowBookingWizard(false);
+      setBookingStep(1);
+      setSelectedPatient(null);
+      setPatientSearchQuery("");
+      setNewBooking({ serviceId: "", date: "", time: "", notes: "" });
+    },
+    onError: (error) => notification.error(error.message || "فشل في إضافة الحجز"),
+  });
+
+  const handleCreateService = (e: React.FormEvent) => {
+    e.preventDefault();
+    createService.mutate(newService);
+  };
+
+  const handleCreatePatient = (e: React.FormEvent) => {
+    e.preventDefault();
+    createPatient.mutate(newPatient);
+  };
+
+  const handleCreateBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPatient || !newBooking.serviceId || !newBooking.date || !newBooking.time) {
+      notification.error("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    const [hours, minutes] = newBooking.time.split(":").map(Number);
+    const bookingDate = new Date(newBooking.date);
+    const startTime = new Date(newBooking.date);
+    startTime.setHours(hours!, minutes!);
+
+    createBookingForPatient.mutate({
+      patientId: selectedPatient,
+      serviceId: newBooking.serviceId,
+      date: bookingDate,
+      startTime,
+      notes: newBooking.notes || undefined,
+    });
+  };
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    await router.push("/");
+  };
+
+  // Filter bookings based on search and status
+  const filteredBookings = useMemo(() => {
+    if (!bookings) return [];
+
+    return bookings.filter((booking) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        booking.patient.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.patient.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.patient.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.patient.phone.includes(searchQuery);
+
+      const matchesStatus =
+        statusFilter === "ALL" || booking.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [bookings, searchQuery, statusFilter]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-lg text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Head>
+        <title>لوحة التحكم - عيادات د. محمد حماد</title>
+      </Head>
+
+      <div className="min-h-screen bg-gradient-to-br from-accent-light via-white to-accent-light/50">
+        <DashboardHeader onSignOut={handleSignOut} />
+
+        <div className="container mx-auto px-6 py-8">
+          <WelcomeMessage />
+
+          {/* Stats Grid */}
+          <StatsCards stats={stats} />
+
+          <ServicesManagement
+            services={services}
+            onAddClick={() => setShowServiceModal(true)}
+            onDeleteService={(id) => deleteService.mutate({ id })}
+          />
+
+          {/* Bookings Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold text-primary mb-1">
+                  الحجوزات الأخيرة
+                </h3>
+                <p className="text-gray-600">إدارة ومتابعة حجوزات المرضى</p>
+              </div>
+              <Button
+                onClick={() => setShowBookingWizard(true)}
+                className="gap-2 shadow-lg hover:shadow-xl transition-all"
+                style={{ background: 'linear-gradient(135deg, #0a1931 0%, #4a7fa7 100%)' }}
+              >
+                <Plus className="h-5 w-5" />
+                حجز جديد
+              </Button>
+            </div>
+
+            {/* Search and Filter Bar */}
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
+              <div className="flex-1 relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder="ابحث بالاسم أو البريد أو الهاتف..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pe-10 ps-4"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-500" />
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="تصفية حسب الحالة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">جميع الحجوزات</SelectItem>
+                    <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                    <SelectItem value="CONFIRMED">مؤكدة</SelectItem>
+                    <SelectItem value="COMPLETED">مكتملة</SelectItem>
+                    <SelectItem value="CANCELLED">ملغية</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Bookings Cards */}
+            {filteredBookings && filteredBookings.length > 0 ? (
+              <div className="space-y-4">
+                {filteredBookings.map((booking, index) => {
+                  const statusBadge = getStatusBadge(booking.status);
+                  const StatusIcon = statusBadge.icon;
+                  const isExpanded = expandedBooking === booking.id;
+                  const avatarColor = getAvatarColor(booking.patient.firstName);
+
+                  return (
+                    <motion.div
+                      key={booking.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
+                    >
+                      {/* Main Card Content */}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          {/* Patient Info */}
+                          <div className="flex items-center gap-4 flex-1">
+                            {/* Avatar */}
+                            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${avatarColor} text-white text-xl font-bold shadow-lg flex-shrink-0`}>
+                              {booking.patient.firstName.charAt(0)}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-bold text-primary mb-1 truncate">
+                                {booking.patient.firstName} {booking.patient.lastName}
+                              </h4>
+                              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <Mail className="h-3.5 w-3.5" />
+                                  {booking.patient.email}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3.5 w-3.5" />
+                                  {booking.patient.phone}
+                                </span>
+                              </div>
+                              {booking.patient.allergies && (
+                                <div className="mt-2 flex items-center gap-1 text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1 inline-flex">
+                                  ⚠️ حساسية: {booking.patient.allergies}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Status Badge */}
+                          <div className={`flex items-center gap-2 rounded-full ${statusBadge.bg} ${statusBadge.text} border ${statusBadge.border} px-4 py-2 text-sm font-semibold whitespace-nowrap`}>
+                            <StatusIcon className="h-4 w-4" />
+                            {statusBadge.label}
+                          </div>
+                        </div>
+
+                        {/* Booking Details */}
+                        <div className="mt-4 grid gap-4 md:grid-cols-3 bg-gray-50 rounded-xl p-4">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">الخدمة</p>
+                            <p className="font-semibold text-gray-900">{booking.service.name}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">التاريخ</p>
+                            <p className="font-semibold text-gray-900">
+                              {format(new Date(booking.date), "dd MMMM yyyy", { locale: ar })}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">الوقت</p>
+                            <p className="font-semibold text-gray-900">
+                              {format(new Date(booking.startTime), "h:mm a", { locale: ar })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => router.push(`/admin/patient/${booking.patient.id}`)}
+                            className="gap-2 flex-1 sm:flex-none"
+                          >
+                            <Users className="h-4 w-4" />
+                            عرض السجل الطبي
+                          </Button>
+
+                          {booking.status === "PENDING" && (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                updateBookingStatus.mutate({
+                                  id: booking.id,
+                                  status: "CONFIRMED",
+                                })
+                              }
+                              className="gap-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 flex-1 sm:flex-none"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              تأكيد الحجز
+                            </Button>
+                          )}
+
+                          {booking.status === "CONFIRMED" && (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                updateBookingStatus.mutate({
+                                  id: booking.id,
+                                  status: "COMPLETED",
+                                })
+                              }
+                              className="gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 flex-1 sm:flex-none"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              إكمال الزيارة
+                            </Button>
+                          )}
+
+                          <button
+                            onClick={() =>
+                              setExpandedBooking(isExpanded ? null : booking.id)
+                            }
+                            className="flex items-center gap-2 text-sm text-primary hover:text-primary-light transition-colors px-3 py-2 rounded-lg hover:bg-accent-light"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-4 w-4" />
+                                إخفاء التفاصيل
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-4 w-4" />
+                                المزيد من التفاصيل
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Details */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden border-t border-gray-100"
+                          >
+                            <div className="p-6 bg-gradient-to-br from-accent-light to-white space-y-4">
+                              {booking.notes && (
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    ملاحظات المريض
+                                  </p>
+                                  <p className="text-sm text-gray-600 bg-white rounded-lg p-3 border border-gray-200">
+                                    {booking.notes}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div>
+                                <p className="text-sm font-semibold text-gray-700 mb-2">تغيير حالة الحجز</p>
+                                <Select
+                                  value={booking.status}
+                                  onValueChange={(value) =>
+                                    updateBookingStatus.mutate({
+                                      id: booking.id,
+                                      status: value as BookingStatus,
+                                    })
+                                  }
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                                    <SelectItem value="CONFIRMED">مؤكد</SelectItem>
+                                    <SelectItem value="COMPLETED">مكتمل</SelectItem>
+                                    <SelectItem value="CANCELLED">ملغي</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-lg border border-gray-100">
+                <Calendar className="h-16 w-16 text-gray-300 mb-4" />
+                <p className="text-lg font-medium text-gray-600 mb-2">
+                  {searchQuery || statusFilter !== "ALL"
+                    ? "لا توجد نتائج مطابقة للبحث"
+                    : "لا توجد حجوزات حالياً"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {searchQuery || statusFilter !== "ALL"
+                    ? "جرب تغيير معايير البحث أو التصفية"
+                    : "الحجوزات الجديدة ستظهر هنا"}
+                </p>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Service Modal */}
+      <AnimatePresence>
+        {showServiceModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowServiceModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="border-b border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-bold text-primary">إضافة خدمة جديدة</h3>
+                  <button
+                    onClick={() => setShowServiceModal(false)}
+                    className="rounded-lg p-2 hover:bg-gray-100 transition-colors"
+                  >
+                    <X className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleCreateService} className="p-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="name" className="text-base font-semibold">اسم الخدمة</Label>
+                    <Input
+                      id="name"
+                      value={newService.name}
+                      onChange={(e) =>
+                        setNewService({ ...newService, name: e.target.value })
+                      }
+                      placeholder="مثال: كشف عام"
+                      className="mt-2"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="duration" className="text-base font-semibold">المدة (بالدقائق)</Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      value={newService.duration}
+                      onChange={(e) =>
+                        setNewService({
+                          ...newService,
+                          duration: parseInt(e.target.value),
+                        })
+                      }
+                      placeholder="30"
+                      className="mt-2"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="price" className="text-base font-semibold">السعر (ج.م)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={newService.price}
+                      onChange={(e) =>
+                        setNewService({
+                          ...newService,
+                          price: parseFloat(e.target.value),
+                        })
+                      }
+                      placeholder="200"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="description" className="text-base font-semibold">الوصف</Label>
+                    <Textarea
+                      id="description"
+                      value={newService.description}
+                      onChange={(e) =>
+                        setNewService({
+                          ...newService,
+                          description: e.target.value,
+                        })
+                      }
+                      placeholder="وصف تفصيلي للخدمة..."
+                      rows={4}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+                <div className="mt-8 flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={createService.isPending}
+                    className="flex-1 gap-2"
+                    style={{ background: 'linear-gradient(135deg, #0a1931 0%, #4a7fa7 100%)' }}
+                  >
+                    {createService.isPending ? "جاري الحفظ..." : "حفظ الخدمة"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowServiceModal(false)}
+                    className="flex-1"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Booking Wizard */}
+      <BookingWizard
+        show={showBookingWizard}
+        onClose={() => setShowBookingWizard(false)}
+        services={services}
+        searchResults={searchResults}
+        patientSearchQuery={patientSearchQuery}
+        setPatientSearchQuery={setPatientSearchQuery}
+        newPatient={newPatient}
+        setNewPatient={setNewPatient}
+        newBooking={newBooking}
+        setNewBooking={setNewBooking}
+        onCreatePatient={handleCreatePatient}
+        onCreateBooking={handleCreateBooking}
+        bookingStep={bookingStep}
+        setBookingStep={setBookingStep}
+        selectedPatient={selectedPatient}
+        setSelectedPatient={setSelectedPatient}
+      />
+
+    </>
+  );
+}
