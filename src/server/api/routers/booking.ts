@@ -143,7 +143,7 @@ export const bookingRouter = createTRPCRouter({
   getByEmail: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const patient = await ctx.db.patient.findUnique({
+      const patient = await ctx.db.patient.findFirst({
         where: { email: input.email },
         include: {
           bookings: {

@@ -16,7 +16,12 @@ export default function UsersPage() {
 
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<{ id: string; name: string; email: string; role: AdminRole } | null>(null);
-  const [newUser, setNewUser] = useState({
+  const [newUser, setNewUser] = useState<{
+    name: string;
+    email: string;
+    password: string;
+    role: AdminRole;
+  }>({
     name: "",
     email: "",
     password: "",

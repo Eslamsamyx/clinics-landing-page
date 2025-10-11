@@ -66,7 +66,7 @@ const sessionNoteSchema = z.object({
   doctorNote: z.string().min(1, "ملاحظات الطبيب مطلوبة"),
   diagnosis: z.string().optional(),
   prescription: z.string().optional(),
-  followUpRequired: z.boolean().default(false),
+  followUpRequired: z.boolean(),
   followUpDate: z.string().optional(),
 }).refine(
   (data) => {

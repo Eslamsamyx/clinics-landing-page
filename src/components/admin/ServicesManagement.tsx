@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import { Plus, Clock, Trash2, Stethoscope } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { ConfirmDialog } from "~/components/ui/confirm-dialog";
+import type { Decimal } from "@prisma/client/runtime/library";
 
 interface Service {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   duration: number;
-  price: number | null;
+  price: Decimal | null;
 }
 
 interface ServicesManagementProps {

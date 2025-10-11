@@ -57,7 +57,7 @@ export default function PatientsPage() {
     return (
       patient.firstName.toLowerCase().includes(query) ||
       patient.lastName.toLowerCase().includes(query) ||
-      patient.email.toLowerCase().includes(query) ||
+      patient.email?.toLowerCase().includes(query) ||
       patient.phone.includes(query)
     );
   });

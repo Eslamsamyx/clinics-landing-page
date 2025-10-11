@@ -143,7 +143,7 @@ export const adminRouter = createTRPCRouter({
     return services.map((service) => ({
       name: service.name,
       bookings: service._count.bookings,
-      revenue: service.price ? service._count.bookings * service.price : 0,
+      revenue: service.price ? service._count.bookings * service.price.toNumber() : 0,
     }));
   }),
 
@@ -316,11 +316,11 @@ export const adminRouter = createTRPCRouter({
       return ctx.db.patient.findMany({
         where: {
           OR: [
-            { firstName: { contains: input.query, mode: "insensitive" } },
-            { lastName: { contains: input.query, mode: "insensitive" } },
+            { firstName: { contains: input.query, mode: "insensitive" as const } },
+            { lastName: { contains: input.query, mode: "insensitive" as const } },
             { phone: { contains: input.query } },
             ...(input.query.includes("@")
-              ? [{ email: { contains: input.query, mode: "insensitive" } }]
+              ? [{ email: { contains: input.query, mode: "insensitive" as const } }]
               : []),
           ],
         },
@@ -597,11 +597,16 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, password, ...data } = input;
 
-      let updateData = { ...data };
+      const updateData: {
+        name?: string;
+        role?: AdminRole;
+        active?: boolean;
+        password?: string;
+      } = { ...data };
 
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        updateData = { ...updateData, password: hashedPassword };
+        updateData.password = hashedPassword;
       }
 
       return ctx.db.admin.update({

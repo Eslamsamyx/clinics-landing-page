@@ -51,7 +51,7 @@ const getStatusBadge = (status: BookingStatus) => {
 };
 
 // Helper function to get patient avatar color
-const getAvatarColor = (name: string) => {
+const getAvatarColor = (name: string): string => {
   const colors = [
     "bg-gradient-to-br from-purple-500 to-pink-500",
     "bg-gradient-to-br from-blue-500 to-cyan-500",
@@ -61,7 +61,7 @@ const getAvatarColor = (name: string) => {
     "bg-gradient-to-br from-indigo-500 to-purple-500",
   ];
   const index = name.charCodeAt(0) % colors.length;
-  return colors[index];
+  return colors[index] ?? colors[0]!;
 };
 
 export default function BookingsPage() {

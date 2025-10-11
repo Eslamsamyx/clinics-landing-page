@@ -29,7 +29,7 @@ interface Patient {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email: string | null;
   phone: string;
   allergies?: string | null;
 }
@@ -37,6 +37,7 @@ interface Patient {
 interface Service {
   id: string;
   name: string;
+  description?: string | null;
 }
 
 interface Booking {
