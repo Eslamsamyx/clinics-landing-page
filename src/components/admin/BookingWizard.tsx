@@ -42,6 +42,7 @@ interface NewPatient {
 
 interface NewBooking {
   serviceId: string;
+  city: string;
   date: string;
   time: string;
   notes: string;
@@ -90,7 +91,7 @@ export function BookingWizard({
     setSelectedPatientInfo(null);
     setPatientSearchQuery("");
     setNewPatient({ firstName: "", lastName: "", email: "", phone: "" });
-    setNewBooking({ serviceId: "", date: "", time: "", notes: "" });
+    setNewBooking({ serviceId: "", city: "", date: "", time: "", notes: "" });
     onClose();
   };
 
@@ -107,7 +108,7 @@ export function BookingWizard({
   const handleBackToStep1 = () => {
     setBookingStep(1);
     setSelectedPatientInfo(null);
-    setNewBooking({ serviceId: "", date: "", time: "", notes: "" });
+    setNewBooking({ serviceId: "", city: "", date: "", time: "", notes: "" });
   };
 
   const selectedPatientData = selectedPatientInfo;

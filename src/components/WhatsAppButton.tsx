@@ -1,7 +1,7 @@
 import { FaWhatsapp } from "react-icons/fa";
 
 export default function WhatsAppButton() {
-  const whatsappNumber = "+201021133317";
+  const whatsappNumber = "218930006615";
   const whatsappMessage = encodeURIComponent("مرحباً، أود الاستفسار عن حجز موعد في العيادات");
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 

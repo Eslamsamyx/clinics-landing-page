@@ -379,6 +379,7 @@ export const adminRouter = createTRPCRouter({
       z.object({
         patientId: z.string(),
         serviceId: z.string(),
+        city: z.string(),
         date: z.date(),
         startTime: z.date(),
         notes: z.string().optional(),
@@ -433,6 +434,7 @@ export const adminRouter = createTRPCRouter({
         data: {
           patientId: input.patientId,
           serviceId: input.serviceId,
+          city: input.city,
           date: input.date,
           startTime: input.startTime,
           endTime,

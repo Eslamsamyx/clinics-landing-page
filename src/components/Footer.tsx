@@ -1,5 +1,7 @@
-import { Phone, Mail, MapPin, Calendar } from "lucide-react";
+import { Phone, MapPin, Calendar } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import WhatsAppIcon from "./icons/WhatsAppIcon";
 
 export default function Footer() {
   return (
@@ -9,12 +11,18 @@ export default function Footer() {
           {/* About */}
           <div>
             <Link href="/" className="mb-4 flex items-center gap-3 transition-opacity hover:opacity-80">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light">
-                <Calendar className="h-6 w-6" />
+              <div className="relative h-12 w-12 rounded-full overflow-hidden">
+                <Image
+                  src="/dr-nader-hammad-icon.webp"
+                  alt="عيادات د. نادر حماد"
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold">عيادات د. نادر حماد</h3>
-                <p className="text-sm text-accent">رعاية صحية متميزة</p>
+                <p className="text-sm text-accent">خير الناس أنفعهم للناس</p>
               </div>
             </Link>
             <p className="text-accent">
@@ -63,18 +71,38 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h3 className="mb-4 text-lg font-bold">تواصل معنا</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-accent">
-                <Phone className="h-5 w-5" />
-                <span dir="ltr">+201021133317</span>
+            <ul className="space-y-4">
+              {/* WhatsApp Numbers */}
+              <li className="flex flex-col gap-2">
+                <span className="text-xs text-accent/80 font-semibold">واتساب</span>
+                <div className="flex items-center gap-2 text-accent">
+                  <WhatsAppIcon className="h-5 w-5 flex-shrink-0" />
+                  <a href="https://wa.me/218930006615" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" dir="ltr">
+                    +218930006615
+                  </a>
+                </div>
+                <div className="flex items-center gap-2 text-accent">
+                  <WhatsAppIcon className="h-5 w-5 flex-shrink-0" />
+                  <a href="https://wa.me/218920006674" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" dir="ltr">
+                    +218920006674
+                  </a>
+                </div>
               </li>
-              <li className="flex items-center gap-2 text-accent">
-                <Mail className="h-5 w-5" />
-                <span>info@clinic.com</span>
+
+              {/* Phone Number */}
+              <li className="flex flex-col gap-2">
+                <span className="text-xs text-accent/80 font-semibold">للحجز عن طريق الهاتف</span>
+                <div className="flex items-center gap-2 text-accent">
+                  <Phone className="h-5 w-5 flex-shrink-0" />
+                  <a href="tel:+218920006674" className="hover:text-white transition-colors" dir="ltr">
+                    +218920006674
+                  </a>
+                </div>
               </li>
+
               <li className="flex items-center gap-2 text-accent">
                 <MapPin className="h-5 w-5" />
-                <span>القاهرة، مصر</span>
+                <span>ليبيا</span>
               </li>
             </ul>
           </div>

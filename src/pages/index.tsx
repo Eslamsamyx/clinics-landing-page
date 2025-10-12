@@ -3,11 +3,17 @@ import { motion } from "framer-motion";
 import { api } from "~/utils/api";
 import Navbar from "~/components/Navbar";
 import Hero from "~/components/Hero";
+import About from "~/components/About";
+import WhyChooseUs from "~/components/WhyChooseUs";
+import Testimonials from "~/components/Testimonials";
+import VideoReviews from "~/components/VideoReviews";
 import FAQ from "~/components/FAQ";
+import LocationHours from "~/components/LocationHours";
 import Footer from "~/components/Footer";
 import WhatsAppButton from "~/components/WhatsAppButton";
-import { Clock, Stethoscope, CalendarCheck, Phone, MessageCircle } from "lucide-react";
+import { Clock, Stethoscope, CalendarCheck, Phone } from "lucide-react";
 import Link from "next/link";
+import WhatsAppIcon from "~/components/icons/WhatsAppIcon";
 
 export default function Home() {
   const { data: services, isLoading } = api.service.getAll.useQuery();
@@ -18,13 +24,15 @@ export default function Home() {
         <title>عيادات د. نادر حماد - احجز موعدك الآن</title>
         <meta
           name="description"
-          content="احجز موعدك في عيادات د. نادر حماد. خدمات علاجية متميزة مع إمكانية الحجز الإلكتروني السريع."
+          content="احجز موعدك في عيادات د. نادر حماد. استشاري العلاج الطبيعي والعمود الفقري والمفاصل والطب الشمولي والصيني. خدمات علاجية متميزة مع إمكانية الحجز الإلكتروني السريع."
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Navbar />
       <Hero />
+      <About />
+      <WhyChooseUs />
 
       {/* Services Section */}
       <section id="services" className="py-20">
@@ -105,7 +113,7 @@ export default function Home() {
                             className="text-2xl font-bold"
                             style={{ color: '#0a1931' }}
                           >
-                            {service.price.toString()} ج.م
+                            {service.price.toString()} د.ل
                           </div>
                         )}
                       </div>
@@ -126,6 +134,9 @@ export default function Home() {
         </div>
       </section>
 
+      <VideoReviews />
+      <Testimonials />
+      <LocationHours />
       <FAQ />
 
       {/* Contact Section */}
@@ -166,27 +177,42 @@ export default function Home() {
               <div className="rounded-2xl bg-primary-dark/60 backdrop-blur-sm p-10 shadow-2xl border border-accent/30">
                 <p className="mb-6 text-lg text-accent">للحجز والاستفسارات</p>
 
-                {/* Phone Number */}
-                <a
-                  href="tel:+201021133317"
-                  className="inline-flex items-center gap-3 text-4xl font-bold text-white hover:text-accent transition-colors duration-300 mb-6"
-                >
-                  <Phone className="h-10 w-10" />
-                  <span dir="ltr">+201021133317</span>
-                </a>
+                {/* Contact Numbers */}
+                <div className="mb-6 space-y-6">
+                  {/* WhatsApp Numbers */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-accent text-sm font-semibold">واتساب</p>
+                    <a
+                      href="https://wa.me/218930006615"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <WhatsAppIcon className="h-7 w-7" />
+                      <span dir="ltr">+218930006615</span>
+                    </a>
+                    <a
+                      href="https://wa.me/218920006674"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <WhatsAppIcon className="h-7 w-7" />
+                      <span dir="ltr">+218920006674</span>
+                    </a>
+                  </div>
 
-                {/* WhatsApp Button */}
-                <div className="mt-6">
-                  <a
-                    href="https://wa.me/201021133317"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 rounded-lg px-8 py-3 text-white font-semibold transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                    style={{ background: '#25D366' }}
-                  >
-                    <MessageCircle className="h-6 w-6" />
-                    تواصل عبر واتساب
-                  </a>
+                  {/* Phone Numbers */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-accent text-sm font-semibold">للحجز عن طريق الهاتف</p>
+                    <a
+                      href="tel:+218920006674"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <Phone className="h-6 w-6" />
+                      <span dir="ltr">+218920006674</span>
+                    </a>
+                  </div>
                 </div>
 
                 {/* Booking Button */}
@@ -195,7 +221,7 @@ export default function Home() {
                     href="/booking"
                     className="inline-block rounded-lg px-10 py-4 text-primary font-bold text-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-accent hover:bg-white"
                   >
-                    احجز موعدك الآن
+                    احجز موعدك الآن من خلال الموقع
                   </a>
                 </div>
               </div>

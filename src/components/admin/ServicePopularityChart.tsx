@@ -76,7 +76,7 @@ export function ServicePopularityChart({ data }: ServicePopularityChartProps) {
             <p className="text-sm text-gray-600">
               الإيرادات:{" "}
               <span className="font-bold text-green-600">
-                {payload[0].payload.revenue.toLocaleString()} ج.م
+                {payload[0].payload.revenue.toLocaleString()} د.ل
               </span>
             </p>
           )}
@@ -119,7 +119,7 @@ export function ServicePopularityChart({ data }: ServicePopularityChartProps) {
             <div>
               <p className="text-xs text-gray-500 mb-1">الإيرادات المتوقعة</p>
               <p className="text-xl font-bold text-green-600">
-                {totalRevenue.toLocaleString()} ج.م
+                {totalRevenue.toLocaleString()} د.ل
               </p>
             </div>
           )}
@@ -163,7 +163,7 @@ export function ServicePopularityChart({ data }: ServicePopularityChartProps) {
                 <div className="flex items-center gap-4 text-sm">
                   {service.revenue > 0 && (
                     <span className="text-green-600 font-semibold">
-                      {service.revenue.toLocaleString()} ج.م
+                      {service.revenue.toLocaleString()} د.ل
                     </span>
                   )}
                   <span className="text-primary-light font-bold">
@@ -202,7 +202,7 @@ export function ServicePopularityChart({ data }: ServicePopularityChartProps) {
           <span className="font-bold">{topService.name}</span> هي الخدمة الأكثر طلباً بإجمالي{" "}
           <span className="font-bold">{topService.bookings}</span> حجز
           {topService.revenue > 0 && (
-            <> وإيرادات متوقعة <span className="font-bold">{topService.revenue.toLocaleString()} ج.م</span></>
+            <> وإيرادات متوقعة <span className="font-bold">{topService.revenue.toLocaleString()} د.ل</span></>
           )}
         </p>
       </div>

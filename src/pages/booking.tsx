@@ -4,7 +4,8 @@ import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import ArabicBookingForm from "~/components/ArabicBookingForm";
 import WhatsAppButton from "~/components/WhatsAppButton";
-import { Calendar, Phone, MessageCircle } from "lucide-react";
+import { Calendar, Phone } from "lucide-react";
+import WhatsAppIcon from "~/components/icons/WhatsAppIcon";
 
 export default function Booking() {
   return (
@@ -22,7 +23,7 @@ export default function Booking() {
 
       {/* Page Header */}
       <section
-        className="relative overflow-hidden py-20"
+        className="relative overflow-hidden pt-32 pb-20"
         style={{
           background: "linear-gradient(135deg, #0a1931 0%, #1a3d63 50%, #4a7fa7 100%)",
         }}
@@ -146,27 +147,42 @@ export default function Booking() {
               <div className="rounded-2xl bg-primary-dark/60 backdrop-blur-sm p-10 shadow-2xl border border-accent/30">
                 <p className="mb-6 text-lg text-accent">للحجز والاستفسارات</p>
 
-                {/* Phone Number */}
-                <a
-                  href="tel:+201021133317"
-                  className="inline-flex items-center gap-3 text-4xl font-bold text-white hover:text-accent transition-colors duration-300 mb-6"
-                >
-                  <Phone className="h-10 w-10" />
-                  <span dir="ltr">+201021133317</span>
-                </a>
+                {/* Contact Numbers */}
+                <div className="mb-6 space-y-6">
+                  {/* WhatsApp Numbers */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-accent text-sm font-semibold">واتساب</p>
+                    <a
+                      href="https://wa.me/218930006615"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <WhatsAppIcon className="h-7 w-7" />
+                      <span dir="ltr">+218930006615</span>
+                    </a>
+                    <a
+                      href="https://wa.me/218920006674"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <WhatsAppIcon className="h-7 w-7" />
+                      <span dir="ltr">+218920006674</span>
+                    </a>
+                  </div>
 
-                {/* WhatsApp Button */}
-                <div className="mt-6">
-                  <a
-                    href="https://wa.me/201021133317"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 rounded-lg px-8 py-3 text-white font-semibold transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                    style={{ background: '#25D366' }}
-                  >
-                    <MessageCircle className="h-6 w-6" />
-                    تواصل عبر واتساب
-                  </a>
+                  {/* Phone Numbers */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-accent text-sm font-semibold">للحجز عن طريق الهاتف</p>
+                    <a
+                      href="tel:+218920006674"
+                      className="inline-flex items-center gap-3 text-2xl font-bold text-white hover:text-accent transition-colors duration-300"
+                    >
+                      <Phone className="h-6 w-6" />
+                      <span dir="ltr">+218920006674</span>
+                    </a>
+                  </div>
                 </div>
 
                 {/* Back to Home */}

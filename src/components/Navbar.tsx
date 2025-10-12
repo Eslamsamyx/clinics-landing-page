@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Calendar, LogIn } from "lucide-react";
@@ -45,22 +46,35 @@ export default function Navbar({ alwaysSolid = false }: NavbarProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <motion.div
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light"
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              className="relative h-12 w-12 rounded-full overflow-hidden"
+              whileHover={{ scale: 1.1 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <Calendar className="h-6 w-6 text-white" />
+              <Image
+                src="/dr-nader-hammad-icon.webp"
+                alt="عيادات د. نادر حماد"
+                fill
+                sizes="48px"
+                className="object-cover"
+                priority
+              />
             </motion.div>
             <div className="text-white">
               <h1 className="text-base font-bold sm:text-lg md:text-xl transition-all duration-300 group-hover:text-accent drop-shadow-lg">
                 عيادات د. نادر حماد
               </h1>
-              <p className="text-[10px] text-accent sm:text-xs drop-shadow-md">رعاية صحية متميزة</p>
+              <p className="text-[10px] text-accent sm:text-xs drop-shadow-md">خير الناس أنفعهم للناس</p>
             </div>
           </Link>
 
           {/* Desktop Menu */}
           <div className="hidden items-center gap-8 md:flex">
+            <Link href="/#about" className="relative group">
+              <span className="text-accent transition-colors duration-300 group-hover:text-white drop-shadow-md">
+                عن الدكتور
+              </span>
+              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-accent transition-all duration-300 group-hover:w-full" />
+            </Link>
             <Link href="/#services" className="relative group">
               <span className="text-accent transition-colors duration-300 group-hover:text-white drop-shadow-md">
                 الخدمات
@@ -136,6 +150,7 @@ export default function Navbar({ alwaysSolid = false }: NavbarProps) {
           >
             <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
               {[
+                { href: "/#about", label: "عن الدكتور" },
                 { href: "/#services", label: "الخدمات" },
                 { href: "/booking", label: "احجز موعد" },
                 { href: "/#faq", label: "الأسئلة الشائعة" },

@@ -1,6 +1,7 @@
 import { serviceRouter } from "~/server/api/routers/service";
 import { bookingRouter } from "~/server/api/routers/booking";
 import { adminRouter } from "~/server/api/routers/admin";
+import { videoReviewRouter } from "~/server/api/routers/videoReview";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   service: serviceRouter,
   booking: bookingRouter,
   admin: adminRouter,
+  videoReview: videoReviewRouter,
 });
 
 // export type definition of API

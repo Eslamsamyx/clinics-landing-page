@@ -89,6 +89,7 @@ export default function BookingsPage() {
 
   const [newBooking, setNewBooking] = useState({
     serviceId: "",
+    city: "",
     date: "",
     time: "",
     notes: "",
@@ -134,7 +135,7 @@ export default function BookingsPage() {
       setBookingStep(1);
       setSelectedPatient(null);
       setPatientSearchQuery("");
-      setNewBooking({ serviceId: "", date: "", time: "", notes: "" });
+      setNewBooking({ serviceId: "", city: "", date: "", time: "", notes: "" });
     },
     onError: (error) => notification.error(error.message || "فشل في إضافة الحجز"),
   });
@@ -176,6 +177,7 @@ export default function BookingsPage() {
     createBookingForPatient.mutate({
       patientId: selectedPatient,
       serviceId: newBooking.serviceId,
+      city: newBooking.city,
       date: bookingDate,
       startTime,
       notes: newBooking.notes || undefined,

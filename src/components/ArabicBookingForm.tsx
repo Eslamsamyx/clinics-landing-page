@@ -23,6 +23,7 @@ import CustomCalendar from "./CustomCalendar";
 
 const bookingSchema = z.object({
   serviceId: z.string({ required_error: "يرجى اختيار الخدمة" }).min(1, "يرجى اختيار الخدمة"),
+  city: z.string({ required_error: "يرجى اختيار المدينة" }).min(1, "يرجى اختيار المدينة"),
   firstName: z.string({ required_error: "الاسم الأول مطلوب" })
     .min(1, "الاسم الأول مطلوب")
     .regex(/^[\p{L}\s]+$/u, "الاسم يجب أن يحتوي على حروف فقط"),
@@ -77,8 +78,7 @@ export default function ArabicBookingForm() {
       const serviceExists = services.find((s) => s.id === serviceIdFromUrl);
       if (serviceExists) {
         setValue("serviceId", serviceIdFromUrl);
-        // Auto-advance to step 2 if service is pre-selected
-        setStep(2);
+        // Stay on step 1 to allow city selection
       }
     }
   }, [router.query.service, services, setValue]);
@@ -247,7 +247,7 @@ export default function ArabicBookingForm() {
                       <div className="flex w-full items-center justify-between gap-4" dir="rtl">
                         <span className="font-medium">{service.name}</span>
                         <span className="text-sm font-semibold text-gray-500">
-                          {service.duration} د - {service.price?.toString()} ج.م
+                          {service.duration} د - {service.price?.toString()} د.ل
                         </span>
                       </div>
                     </SelectItem>
@@ -261,10 +261,33 @@ export default function ArabicBookingForm() {
               )}
             </div>
 
+            <div>
+              <Label htmlFor="city" className="mb-3 text-lg font-semibold" style={{ color: '#0a1931' }}>
+                اختر المدينة
+              </Label>
+              <Select onValueChange={(value) => setValue("city", value)} value={watch("city")}>
+                <SelectTrigger className="mt-2 h-12 border-2 text-base font-medium">
+                  <SelectValue placeholder="اختر المدينة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="بنغازي">بنغازي</SelectItem>
+                  <SelectItem value="اجدابيا">اجدابيا</SelectItem>
+                  <SelectItem value="سبها">سبها</SelectItem>
+                  <SelectItem value="مصراته">مصراته</SelectItem>
+                  <SelectItem value="طرابلس">طرابلس</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.city && (
+                <p className="mt-2 text-sm font-medium text-red-600">
+                  {errors.city.message}
+                </p>
+              )}
+            </div>
+
             <Button
               type="button"
               onClick={() => setStep(2)}
-              disabled={!serviceId}
+              disabled={!serviceId || !watch("city")}
               className="w-full gap-2 h-12 text-xs sm:text-sm lg:text-base font-bold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
               style={{ background: 'linear-gradient(135deg, #0a1931 0%, #4a7fa7 100%)' }}
             >

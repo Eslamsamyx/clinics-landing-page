@@ -23,6 +23,7 @@ import { Calendar, Clock, User, Mail, Phone, FileText } from "lucide-react";
 
 const bookingSchema = z.object({
   serviceId: z.string().min(1, "يرجى اختيار الخدمة"),
+  city: z.string().min(1, "يرجى اختيار المدينة"),
   firstName: z.string()
     .min(1, "الاسم الأول مطلوب")
     .regex(/^[\p{L}\s]+$/u, "الاسم يجب أن يحتوي على حروف فقط"),
@@ -385,7 +386,7 @@ export default function BookingForm() {
               <Input
                 id="phone"
                 {...register("phone")}
-                placeholder="+201021133317"
+                placeholder="+218930006615"
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-600">

@@ -308,10 +308,12 @@ async function main() {
 
   // Create sample bookings with patient relationships
   const today = new Date();
+  const cities = ["بنغازي", "اجدابيا", "سبها", "مصراته", "طرابلس"];
   const bookings = [
     {
       patientId: createdPatients[0]!.id,
       serviceId: createdServices[0]!.id, // استشارة عامة
+      city: cities[0]!,
       date: addDays(today, 1),
       startTime: setMinutes(setHours(addDays(today, 1), 10), 0),
       endTime: setMinutes(setHours(addDays(today, 1), 10), 30),
@@ -321,6 +323,7 @@ async function main() {
     {
       patientId: createdPatients[1]!.id,
       serviceId: createdServices[0]!.id,
+      city: cities[1]!,
       date: addDays(today, 1),
       startTime: setMinutes(setHours(addDays(today, 1), 11), 0),
       endTime: setMinutes(setHours(addDays(today, 1), 11), 30),
@@ -330,6 +333,7 @@ async function main() {
     {
       patientId: createdPatients[2]!.id,
       serviceId: createdServices[2]!.id, // رعاية الأطفال
+      city: cities[2]!,
       date: addDays(today, 2),
       startTime: setMinutes(setHours(addDays(today, 2), 9), 0),
       endTime: setMinutes(setHours(addDays(today, 2), 9), 30),
@@ -339,6 +343,7 @@ async function main() {
     {
       patientId: createdPatients[3]!.id,
       serviceId: createdServices[3]!.id, // التطعيمات
+      city: cities[3]!,
       date: addDays(today, 2),
       startTime: setMinutes(setHours(addDays(today, 2), 14), 0),
       endTime: setMinutes(setHours(addDays(today, 2), 14), 15),
@@ -348,6 +353,7 @@ async function main() {
     {
       patientId: createdPatients[4]!.id,
       serviceId: createdServices[4]!.id, // الفحص الشامل
+      city: cities[4]!,
       date: addDays(today, 3),
       startTime: setMinutes(setHours(addDays(today, 3), 10), 0),
       endTime: setMinutes(setHours(addDays(today, 3), 10), 45),
@@ -357,6 +363,7 @@ async function main() {
     {
       patientId: createdPatients[5]!.id,
       serviceId: createdServices[1]!.id, // زيارة متابعة
+      city: cities[0]!,
       date: addDays(today, 3),
       startTime: setMinutes(setHours(addDays(today, 3), 15), 0),
       endTime: setMinutes(setHours(addDays(today, 3), 15), 20),
@@ -366,6 +373,7 @@ async function main() {
     {
       patientId: createdPatients[6]!.id,
       serviceId: createdServices[5]!.id, // إدارة الأمراض المزمنة
+      city: cities[1]!,
       date: addDays(today, 4),
       startTime: setMinutes(setHours(addDays(today, 4), 11), 0),
       endTime: setMinutes(setHours(addDays(today, 4), 11), 40),
@@ -375,6 +383,7 @@ async function main() {
     {
       patientId: createdPatients[7]!.id,
       serviceId: createdServices[0]!.id, // استشارة عامة
+      city: cities[2]!,
       date: addDays(today, 5),
       startTime: setMinutes(setHours(addDays(today, 5), 9), 30),
       endTime: setMinutes(setHours(addDays(today, 5), 10), 0),
@@ -389,6 +398,53 @@ async function main() {
     });
   }
   console.log("✓ تم إضافة الحجوزات التجريبية");
+
+  // Create video reviews
+  const videoReviews = [
+    {
+      patientId: createdPatients[0]!.id,
+      patientName: "أحمد محمود",
+      videoUrl: "/videos/patient-1.mp4",
+      treatment: "علاج العمود الفقري",
+      title: "تحسن ملحوظ بعد جلسات العلاج الطبيعي",
+      isActive: true,
+      order: 1,
+    },
+    {
+      patientId: createdPatients[1]!.id,
+      patientName: "فاطمة علي",
+      videoUrl: "/videos/patient-2.mp4",
+      treatment: "الإبر الصينية",
+      title: "تجربتي مع الإبر الصينية لعلاج آلام الركبة",
+      isActive: true,
+      order: 2,
+    },
+    {
+      patientId: createdPatients[2]!.id,
+      patientName: "مريم حسن",
+      videoUrl: "/videos/patient-3-1.mp4",
+      treatment: "التأهيل الحركي",
+      title: "رحلة التعافي مع العلاج الطبيعي",
+      isActive: true,
+      order: 3,
+    },
+    {
+      patientId: createdPatients[2]!.id,
+      patientName: "مريم حسن",
+      videoUrl: "/videos/patient-3-2.mp4",
+      treatment: "التأهيل الحركي",
+      title: "نتائج العلاج بعد 6 أشهر",
+      isActive: true,
+      order: 4,
+    },
+  ];
+
+  for (const videoReview of videoReviews) {
+    await prisma.videoReview.create({
+      data: videoReview,
+    });
+  }
+  console.log("✓ تم إضافة مراجعات الفيديو");
 
   console.log("✅ اكتملت عملية إضافة البيانات الأولية بنجاح!");
 }

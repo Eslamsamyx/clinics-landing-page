@@ -86,7 +86,7 @@ export function ServicesManagement({
                     <span className="text-sm font-medium text-gray-700">{service.duration} دقيقة</span>
                   </div>
                   <span className="text-lg font-bold text-primary">
-                    {service.price?.toString()} ج.م
+                    {service.price?.toString()} د.ل
                   </span>
                 </div>
                 <Button

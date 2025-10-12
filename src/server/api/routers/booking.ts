@@ -8,6 +8,7 @@ export const bookingRouter = createTRPCRouter({
     .input(
       z.object({
         serviceId: z.string(),
+        city: z.string().min(1),
         firstName: z.string().min(1),
         lastName: z.string().min(1),
         email: z.string().optional().nullable(),
@@ -71,6 +72,7 @@ export const bookingRouter = createTRPCRouter({
         data: {
           patientId: patient.id,
           serviceId: input.serviceId,
+          city: input.city,
           date: input.date,
           startTime: input.startTime,
           endTime,

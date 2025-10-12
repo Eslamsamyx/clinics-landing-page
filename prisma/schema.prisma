@@ -26,6 +26,7 @@ model Patient {
     createdAt        DateTime  @default(now())
     updatedAt        DateTime  @updatedAt
     bookings         Booking[]
+    videoReviews     VideoReview[]
 
     @@index([email])
     @@index([phone])
@@ -54,6 +55,7 @@ model Booking {
     date         DateTime
     startTime    DateTime
     endTime      DateTime
+    city         String        // City where the appointment is
     notes        String?       @db.Text // Patient's notes when booking
     status       BookingStatus @default(PENDING)
     createdAt    DateTime      @default(now())
@@ -105,4 +107,23 @@ model Admin {
 enum AdminRole {
     ADMIN
     ASSISTANT
+}
+
+model VideoReview {
+    id          String   @id @default(cuid())
+    patientId   String
+    patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+    patientName String   // Display name for the review
+    videoUrl    String   // YouTube, Vimeo, or other video URL
+    thumbnailUrl String? // Optional custom thumbnail
+    title       String?  // Optional title for the review
+    treatment   String?  // What treatment they received
+    isActive    Boolean  @default(true)
+    order       Int      @default(0) // For sorting/ordering videos
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([patientId])
+    @@index([isActive])
+    @@index([order])
 }

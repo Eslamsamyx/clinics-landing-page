@@ -90,7 +90,7 @@ export function ServiceModal({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="price" className="text-base font-semibold">السعر (ج.م)</Label>
+                  <Label htmlFor="price" className="text-base font-semibold">السعر (د.ل)</Label>
                   <Input
                     id="price"
                     type="number"
