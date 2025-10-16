@@ -52,7 +52,7 @@ export default function About() {
     },
     {
       icon: Sparkles,
-      title: "الطب البديل",
+      title: "الطب الشمولي",
       description: "نجمع بين العلاج التقليدي والحديث لنتائج أفضل"
     },
   ];
@@ -108,7 +108,7 @@ export default function About() {
                 {/* Doctor Image */}
                 <div className="relative aspect-[4/5]">
                   <Image
-                    src="/dr-nader-hammad.webp"
+                    src="/dr-nader-hammad-.webp"
                     alt="د. نادر حماد - استشاري العلاج الطبيعي والطب الشمولي"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
